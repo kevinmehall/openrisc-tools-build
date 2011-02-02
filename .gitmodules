@@ -1,0 +1,12 @@
+[submodule "binutils"]
+	path = binutils
+	url = git://openrisc.net/jonas/binutils-svn
+[submodule "gcc"]
+	path = gcc
+	url = git://openrisc.net/jonas/gcc-svn
+[submodule "linux"]
+	path = linux
+	url = git://openrisc.net/jonas/linux
+[submodule "uClibc"]
+	path = uClibc
+	url = git://openrisc.net/jonas/uClibc
