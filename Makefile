@@ -14,12 +14,14 @@ MAKE_TARGETS:=binutils gcc uClibc linux-headers gcc-bootstrap
 
 all: gcc
 
-${STAMPS}:
-	mkdir -p $@
+${STAMPS}/build-sys-init:
+	@mkdir -p ${STAMPS} \
+	 && mkdir -p ${LOGS} \
+	 && touch $@
 
-${STAMPS}/install-linux-headers:
+${STAMPS}/install-linux-headers: | ${STAMPS}/build-sys-init
 	cd linux \
-	 && make ARCH=openrisc INSTALL_HDR_PATH=${SYSROOT}/usr headers_install \
+	 && ${MAKE} ARCH=openrisc INSTALL_HDR_PATH=${SYSROOT}/usr headers_install \
 	 && touch $@
 
 CONFIGURE_binutils := --prefix=${PREFIX} --target=${TARGET} --with-sysroot
@@ -30,7 +32,7 @@ CONFIGURE_gcc-bootstrap := --target=${TARGET} --prefix=${PREFIX} \
          --without-headers --enable-threads=single --disable-libgomp \
          --disable-libmudflap
 
-${STAMPS}/gcc-bootstrap-src-link:
+${STAMPS}/gcc-bootstrap-src-link: ${STAMPS}/build-sys-init
 	@ln -sf -T gcc gcc-bootstrap \
 	 && touch $@
 
@@ -39,10 +41,10 @@ MAKE_uClibc := PREFIX=${SYSROOT} SYSROOT=${SYSROOT} CROSS_COMPILER_PREFIX=${TARG
 INSTALL_uClibc := ${MAKE_uClibc}
 
 ${STAMPS}/install-uClibc: ${BUILDDEPS_uClibc}
-	@cd uClibc && make ARCH=or32 defconfig
+	@cd uClibc && ${MAKE} ARCH=or32 defconfig
 	@cd uClibc \
-	 && make ${MAKE_uClibc} \
-	 && make ${INSTALL_uClibc} install \
+	 && ${MAKE} ${MAKE_uClibc} \
+	 && ${MAKE} ${INSTALL_uClibc} install \
 	 && touch $@ \
 
 BUILDDEPS_gcc := uClibc
@@ -54,6 +56,8 @@ CONFIGURE_gcc := --target=${TARGET} --prefix=${PREFIX} \
 .PHONY: clean
 clean:
 	rm -rf *-build
+	rm -rf logs
+	rm -rf stamps
 	
 #.PHONY: ${MAKE_TARGETS}
 $(filter %,${MAKE_TARGETS}): %: ${STAMPS}/install-%
@@ -70,9 +74,8 @@ $(patsubst %,rebuild-%,${MAKE_TARGETS}): rebuild-%: ${STAMPS}/build-%
 $(patsubst %,clean-%,${MAKE_TARGETS}): clean-%:
 	rm -rf $*-build
 
-
 .SECONDEXPANSION:
-${STAMPS}/configure-%: $${BUILDDEPS_%} | ${STAMPS}
+${STAMPS}/configure-%: $${BUILDDEPS_%} | ${STAMPS}/build-sys-init
 	@echo Configuring: $*
 	@mkdir -p $*-build
 	@cd $*-build \
@@ -82,13 +85,13 @@ ${STAMPS}/configure-%: $${BUILDDEPS_%} | ${STAMPS}
 ${STAMPS}/build-%: ${STAMPS}/configure-%
 	@echo Building: $*
 	@cd $*-build \
-	 && (make ${MAKE_$*} >${LOGS}/build-$*.log 2>&1 \
+	 && (${MAKE} ${MAKE_$*} >${LOGS}/build-$*.log 2>&1 \
 	 && touch $@) || cat ${LOGS}/build-$*.log
 
 ${STAMPS}/install-%: ${STAMPS}/build-%
 	@echo Installing: $*
 	@cd $*-build \
-	 && (make install ${INSTALL_$*} >${LOGS}/install-$*.log 2>&1 \
+	 && (${MAKE} install ${INSTALL_$*} >${LOGS}/install-$*.log 2>&1 \
 	 && touch $@) || cat ${LOGS}/install-$*.log
 
 
