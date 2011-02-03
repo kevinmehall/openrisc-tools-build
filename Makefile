@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX:=${PWD}/toolchain-out
+PREFIX?=${PWD}/toolchain-out
 TARGET:=or32-linux
 SYSROOT:=${PREFIX}/${TARGET}/sys-root
 
@@ -20,9 +20,10 @@ ${STAMPS}/build-sys-init:
 	 && touch $@
 
 ${STAMPS}/install-linux-headers: | ${STAMPS}/build-sys-init
-	cd linux \
-	 && ${MAKE} ARCH=openrisc INSTALL_HDR_PATH=${SYSROOT}/usr headers_install \
-	 && touch $@
+	@echo Installing: linux-headers
+	@cd linux \
+	 && (${MAKE} ARCH=openrisc INSTALL_HDR_PATH=${SYSROOT}/usr headers_install >${LOGS}/install-linux-headers.log 2>&1 \
+	 && touch $@) || cat ${LOGS}/install-linux-headers.log
 
 CONFIGURE_binutils := --prefix=${PREFIX} --target=${TARGET} --with-sysroot
 
