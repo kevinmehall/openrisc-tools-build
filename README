@@ -1,0 +1,16 @@
+OpenRISC Toolchain Super-Project!
+---------------------------------
+
+To build the toolchain, do the following:
+
+git submodule update --iniit
+make -j3 PREFIX=<absolute install path>
+
+To clear out all the build stamps and start a fresh build, run:
+
+make clean
+
+You can also force rebuilding from a certain component by just cleaning
+out that component first.  For example:
+
+make clean-uClibc; make -j3 PREFIX=<absolute install path>
