@@ -50,9 +50,9 @@ ${STAMPS}/install-uClibc: ${BUILDDEPS_uClibc}
 
 BUILDDEPS_gcc := uClibc
 CONFIGURE_gcc := --target=${TARGET} --prefix=${PREFIX} \
-         --disable-libssp --srcdir=../gcc --enable-languages=c      \
+         --disable-libssp --srcdir=../gcc --enable-languages=c,c++      \
          --enable-threads=posix --disable-libgomp --disable-libmudflap  \
-         --with-sysroot=${SYSROOT}
+         --disable-shared --with-sysroot=${SYSROOT}
 
 .PHONY: clean
 clean:
