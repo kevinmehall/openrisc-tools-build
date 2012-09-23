@@ -10,3 +10,9 @@
 [submodule "uClibc"]
 	path = uClibc
 	url = git://openrisc.net/jonas/uClibc
+[submodule "or1ksim"]
+	path = or1ksim
+	url = git://openrisc.net/jonas/or1ksim-svn
+[submodule "gdb"]
+	path = gdb
+	url = git://openrisc.net/jonas/gdb

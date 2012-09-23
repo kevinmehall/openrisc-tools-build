@@ -13,9 +13,9 @@ PATH:=${PREFIX}/bin:${PATH}
 STAMPS:=${PWD}/stamps
 LOGS:=${PWD}/logs
 
-MAKE_TARGETS:=binutils gcc uClibc linux-headers gcc-bootstrap
+MAKE_TARGETS:=binutils gcc uClibc linux-headers gcc-bootstrap or1ksim gdb
 
-all: gcc
+all: gcc gdb
 
 ${STAMPS}/build-sys-init:
 	@mkdir -p ${STAMPS} \
@@ -56,6 +56,13 @@ CONFIGURE_gcc := --target=${TARGET} --prefix=${PREFIX} \
          --disable-libssp --srcdir=../gcc --enable-languages=c,c++      \
          --enable-threads=posix --disable-libgomp --disable-libmudflap  \
          --disable-shared --with-sysroot=${SYSROOT}
+
+BUILDDEPS_or1ksim := gcc
+CONFIGURE_or1ksim := --prefix=${PREFIX}
+
+BUILDDEPS_gdb := gcc or1ksim
+CONFIGURE_gdb := --target=${TARGET} --prefix=${PREFIX} --with-or1ksim=${PREFIX}
+MAKE_gdb := CFLAGS="-g -O2 -I${PREFIX}/include"
 
 .PHONY: clean
 clean:
