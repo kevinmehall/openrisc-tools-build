@@ -81,19 +81,19 @@ ${STAMPS}/configure-%: $${BUILDDEPS_%} | ${STAMPS}/build-sys-init
 	@mkdir -p $*-build
 	@cd $*-build \
 	 && (../$*/configure ${CONFIGURE_$*} >${LOGS}/configure-$*.log 2>&1 \
-	 && touch $@) || cat ${LOGS}/configure-$*.log
+	 && touch $@) || (cat ${LOGS}/configure-$*.log; exit 1)
 
 ${STAMPS}/build-%: ${STAMPS}/configure-%
 	@echo Building: $*
 	@cd $*-build \
 	 && (${MAKE} ${MAKE_$*} >${LOGS}/build-$*.log 2>&1 \
-	 && touch $@) || cat ${LOGS}/build-$*.log
+	 && touch $@) || (cat ${LOGS}/build-$*.log; exit 1)
 
 ${STAMPS}/install-%: ${STAMPS}/build-%
 	@echo Installing: $*
 	@cd $*-build \
 	 && (${MAKE} install ${INSTALL_$*} >${LOGS}/install-$*.log 2>&1 \
-	 && touch $@) || cat ${LOGS}/install-$*.log
+	 && touch $@) || (cat ${LOGS}/install-$*.log; exit 1)
 
 
 #.PHONY: %
