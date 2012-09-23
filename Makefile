@@ -58,7 +58,7 @@ CONFIGURE_gcc := --target=${TARGET} --prefix=${PREFIX} \
          --disable-shared --with-sysroot=${SYSROOT}
 
 BUILDDEPS_or1ksim := gcc
-CONFIGURE_or1ksim := --prefix=${PREFIX}
+CONFIGURE_or1ksim := --prefix=${PREFIX} --program-prefix=or1k
 
 BUILDDEPS_gdb := gcc or1ksim
 CONFIGURE_gdb := --target=${TARGET} --prefix=${PREFIX} --with-or1ksim=${PREFIX}
