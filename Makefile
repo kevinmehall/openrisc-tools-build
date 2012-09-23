@@ -28,7 +28,7 @@ ${STAMPS}/install-linux-headers: | ${STAMPS}/build-sys-init
 	 && (${MAKE} ARCH=openrisc INSTALL_HDR_PATH=${SYSROOT}/usr headers_install >${LOGS}/install-linux-headers.log 2>&1 \
 	 && touch $@) || cat ${LOGS}/install-linux-headers.log
 
-CONFIGURE_binutils := --prefix=${PREFIX} --target=${TARGET} --with-sysroot
+CONFIGURE_binutils := --prefix=${PREFIX} --target=${TARGET} --with-sysroot --enable-werror=no
 
 BUILDDEPS_gcc-bootstrap := binutils ${STAMPS}/gcc-bootstrap-src-link
 CONFIGURE_gcc-bootstrap := --target=${TARGET} --prefix=${PREFIX} \
