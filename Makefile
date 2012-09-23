@@ -44,12 +44,12 @@ BUILDDEPS_uClibc := gcc-bootstrap linux-headers
 MAKE_uClibc := PREFIX=${SYSROOT} SYSROOT=${SYSROOT} CROSS_COMPILER_PREFIX=${TARGET}-
 INSTALL_uClibc := ${MAKE_uClibc}
 
-${STAMPS}/install-uClibc: ${BUILDDEPS_uClibc}
-	@cd uClibc && ${MAKE} ARCH=or32 defconfig
-	@cd uClibc \
-	 && ${MAKE} ${MAKE_uClibc} \
-	 && ${MAKE} ${INSTALL_uClibc} install \
-	 && touch $@ \
+${STAMPS}/configure-uClibc: | ${BUILDDEPS_uClibc} ${STAMPS}/build-sys-init
+	@echo Configuring: uClibc
+	@rm -f uClibc-build && ln -s uClibc uClibc-build
+	@cd uClibc-build && (${MAKE} ARCH=or32 defconfig >${LOGS}/configure-uClibc.log 2>&1 \
+		|| (cat ${LOGS}/configure-uClibc.log; exit 1))
+	@touch $@
 
 BUILDDEPS_gcc := uClibc
 CONFIGURE_gcc := --target=${TARGET} --prefix=${PREFIX} \
