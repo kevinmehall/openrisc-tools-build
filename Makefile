@@ -4,6 +4,9 @@ PREFIX?=${PWD}/toolchain-out
 TARGET:=or32-linux
 SYSROOT:=${PREFIX}/${TARGET}/sys-root
 
+# Only want to build subproject makefiles in parallel, not targets here
+PARALLEL?=3
+
 PATH:=${PREFIX}/bin:${PATH}
 
 
@@ -86,7 +89,7 @@ ${STAMPS}/configure-%: $${BUILDDEPS_%} | ${STAMPS}/build-sys-init
 ${STAMPS}/build-%: ${STAMPS}/configure-%
 	@echo Building: $*
 	@cd $*-build \
-	 && (${MAKE} ${MAKE_$*} >${LOGS}/build-$*.log 2>&1 \
+	 && (${MAKE} -j$(PARALLEL) ${MAKE_$*} >${LOGS}/build-$*.log 2>&1 \
 	 && touch $@) || (cat ${LOGS}/build-$*.log; exit 1)
 
 ${STAMPS}/install-%: ${STAMPS}/build-%
