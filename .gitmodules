@@ -16,3 +16,6 @@
 [submodule "gdb"]
 	path = gdb
 	url = git://openrisc.net/jonas/gdb
+[submodule "openOCD"]
+	path = openOCD
+	url = https://github.com/kevinmehall/openOCD.git

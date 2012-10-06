@@ -13,9 +13,9 @@ PATH:=${PREFIX}/bin:${PATH}
 STAMPS:=${PWD}/stamps
 LOGS:=${PWD}/logs
 
-MAKE_TARGETS:=binutils gcc uClibc linux-headers gcc-bootstrap or1ksim gdb
+MAKE_TARGETS:=binutils gcc uClibc linux-headers gcc-bootstrap or1ksim gdb openOCD
 
-all: gcc gdb
+all: gcc gdb openOCD
 
 ${STAMPS}/build-sys-init:
 	@mkdir -p ${STAMPS} \
@@ -40,16 +40,12 @@ ${STAMPS}/gcc-bootstrap-src-link: ${STAMPS}/build-sys-init
 	@ln -sf -T gcc gcc-bootstrap \
 	 && touch $@
 
+DIR_uClibc := uClibc
 BUILDDEPS_uClibc := gcc-bootstrap linux-headers
-MAKE_uClibc := PREFIX=${SYSROOT} SYSROOT=${SYSROOT} CROSS_COMPILER_PREFIX=${TARGET}-
+PRE_CONFIGURE_uClibc := ${MAKE} ARCH=or32 defconfig
+MAKE_uClibc := PREFIX=${SYSROOT} ARCH=or32 SYSROOT=${SYSROOT} CROSS_COMPILER_PREFIX=${TARGET}-
 INSTALL_uClibc := ${MAKE_uClibc}
 
-${STAMPS}/configure-uClibc: | ${BUILDDEPS_uClibc} ${STAMPS}/build-sys-init
-	@echo Configuring: uClibc
-	@rm -f uClibc-build && ln -s uClibc uClibc-build
-	@cd uClibc-build && (${MAKE} ARCH=or32 defconfig >${LOGS}/configure-uClibc.log 2>&1 \
-		|| (cat ${LOGS}/configure-uClibc.log; exit 1))
-	@touch $@
 
 BUILDDEPS_gcc := uClibc
 CONFIGURE_gcc := --target=${TARGET} --prefix=${PREFIX} \
@@ -63,6 +59,11 @@ CONFIGURE_or1ksim := --prefix=${PREFIX} --program-prefix=or1k
 BUILDDEPS_gdb := gcc or1ksim
 CONFIGURE_gdb := --target=${TARGET} --prefix=${PREFIX} --with-or1ksim=${PREFIX}
 MAKE_gdb := CFLAGS="-g -O2 -I${PREFIX}/include"
+
+BUILDDEPS_openOCD := 
+PRE_CONFIGURE_openOCD := (cd ../openOCD; ./bootstrap)
+CONFIGURE_openOCD := --prefix=${PREFIX} \
+    --enable-usb_blaster_libftdi --enable-adv_debug_sys --enable-maintainer-mode 
 
 .PHONY: clean
 clean:
@@ -86,22 +87,24 @@ $(patsubst %,clean-%,${MAKE_TARGETS}): clean-%:
 	rm -rf $*-build
 
 .SECONDEXPANSION:
-${STAMPS}/configure-%: $${BUILDDEPS_%} | ${STAMPS}/build-sys-init
+${STAMPS}/configure-%: $${BUILDDEPS_%} ${STAMPS}/build-sys-init
 	@echo Configuring: $*
-	@mkdir -p $*-build
-	@cd $*-build \
-	 && (../$*/configure ${CONFIGURE_$*} >${LOGS}/configure-$*.log 2>&1 \
-	 && touch $@) || (cat ${LOGS}/configure-$*.log; exit 1)
+	@mkdir -p $(or ${DIR_$*}, $*-build)
+	@cd $(or ${DIR_$*}, $*-build) && (true\
+	 $(if ${PRE_CONFIGURE_$*} , && ${PRE_CONFIGURE_$*})  \
+	 $(if ${CONFIGURE_$*} , && ../$*/configure ${CONFIGURE_$*}) \
+	 && touch $@) \
+	   >${LOGS}/configure-$*.log 2>&1 || (cat ${LOGS}/configure-$*.log; exit 1)
 
 ${STAMPS}/build-%: ${STAMPS}/configure-%
 	@echo Building: $*
-	@cd $*-build \
+	@cd $(or ${DIR_$*}, $*-build) \
 	 && (${MAKE} -j$(PARALLEL) ${MAKE_$*} >${LOGS}/build-$*.log 2>&1 \
 	 && touch $@) || (cat ${LOGS}/build-$*.log; exit 1)
 
 ${STAMPS}/install-%: ${STAMPS}/build-%
 	@echo Installing: $*
-	@cd $*-build \
+	@cd $(or ${DIR_$*}, $*-build) \
 	 && (${MAKE} install ${INSTALL_$*} >${LOGS}/install-$*.log 2>&1 \
 	 && touch $@) || (cat ${LOGS}/install-$*.log; exit 1)
 
