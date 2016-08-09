@@ -1,21 +1,21 @@
 [submodule "binutils"]
 	path = binutils
-	url = git://openrisc.net/jonas/binutils-svn
+	url = https://openrisc.net/jonas/binutils-svn
 [submodule "gcc"]
 	path = gcc
-	url = git://openrisc.net/jonas/gcc-svn
+	url = https://openrisc.net/jonas/gcc-svn
 [submodule "linux"]
 	path = linux
-	url = git://openrisc.net/jonas/linux
+	url = https://openrisc.net/jonas/linux
 [submodule "uClibc"]
 	path = uClibc
-	url = git://openrisc.net/jonas/uClibc
+	url = https://openrisc.net/jonas/uClibc
 [submodule "or1ksim"]
 	path = or1ksim
-	url = git://openrisc.net/jonas/or1ksim-svn
+	url = https://openrisc.net/jonas/or1ksim-svn
 [submodule "gdb"]
 	path = gdb
-	url = git://openrisc.net/jonas/gdb
+	url = https://openrisc.net/jonas/gdb
 [submodule "openOCD"]
 	path = openOCD
 	url = https://github.com/kevinmehall/openOCD.git
